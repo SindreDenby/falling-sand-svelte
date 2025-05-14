@@ -49,8 +49,8 @@
     }
   };
 
-  let width = 60;
-  let height = 100;
+  let width = 70;
+  let height = 90;
   let grid: number[][] = createGrid(height, width);
   let gameUpdateInterval: number;
 
