@@ -54,6 +54,10 @@
   let grid: number[][] = createGrid(height, width);
   let gameUpdateInterval: number;
 
+  const resetGrid = () => {
+    grid = createGrid(height, width);
+  };
+
   onMount(() => {
     gameUpdateInterval = setInterval(() => {
       grid = updateGrid(grid);
@@ -84,6 +88,7 @@
       {/each}
     </tbody>
   </table>
+  <button on:click={resetGrid}>Reset Grid</button>
 </main>
 
 <style>
