@@ -27,16 +27,20 @@
     isMouseDown = false;
   };
 
+  const handleMouseLeave = () => {
+    currentCell = null;
+  };
+
   const resetGrid = () => {
     grid = createGrid(height, width);
   };
 
   onMount(() => {
     updateInterval = setInterval(() => {
+      grid = updateGrid(grid);
       if (isMouseDown && currentCell) {
         placeSandAtCell(currentCell.rowIndex, currentCell.colIndex);
       }
-      grid = updateGrid(grid);
     }, REFRESHRATE_MS);
   });
 
@@ -49,6 +53,7 @@
 <main 
   on:mouseup={handleMouseUp} 
   on:mousedown={handleMouseDown}
+  on:mouseleave={handleMouseLeave}
 >
   <table class="sand-table">
     <tbody>
