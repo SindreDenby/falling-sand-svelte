@@ -1,77 +1,55 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
-  import { createGrid, updateGrid, createSandAtCell as importedCreateSandAtCell } from "./lib/gridUtils"
+  import { createGrid, updateGrid, createSandAtCell } from "./lib/gridUtils";
+
+  const REFRESHRATE_MS = 6.944444444; // 144 FPS
 
   let isMouseDown = false;
-  let currentCellInterval: number | null = null;
-  const SAND_CREATION_INTERVAL_MS = 0; // Adjust for sand creation rate (e.g., 75ms)
-
+  let currentCell: { rowIndex: number; colIndex: number } | null = null;
+  let width = 80;
+  let height = 90;
+  let grid: number[][] = createGrid(height, width);
+  let updateInterval: number;
+  
   const placeSandAtCell = (rowIndex: number, colIndex: number) => {
-    grid = importedCreateSandAtCell(grid, rowIndex, colIndex);
+    grid = createSandAtCell(grid, rowIndex, colIndex);
   };
 
-  const stopCellInterval = () => {
-    if (currentCellInterval) {
-      clearInterval(currentCellInterval);
-      currentCellInterval = null;
-    }
-  };
-
-  const startCellInterval = (rowIndex: number, colIndex: number) => {
-    stopCellInterval(); // Clear any existing interval
-    placeSandAtCell(rowIndex, colIndex); // Create sand once immediately
-    currentCellInterval = setInterval(() => {
-      placeSandAtCell(rowIndex, colIndex);
-    }, SAND_CREATION_INTERVAL_MS);
-  };
-
-  const handleMouseDown = (rowIndex: number, colIndex: number) => {
+  const handleMouseDown = () => {
     isMouseDown = true;
-    startCellInterval(rowIndex, colIndex);
   };
 
   const handleMouseEnter = (rowIndex: number, colIndex: number) => {
-    if (isMouseDown) {
-      // If dragging into a new cell, restart the interval for the new cell
-      startCellInterval(rowIndex, colIndex);
-    }
+    currentCell = { rowIndex, colIndex };
   };
 
   const handleMouseUp = () => {
     isMouseDown = false;
-    stopCellInterval();
   };
-
-  // Stop interval if mouse leaves a cell while pressed, before entering another
-  const handleMouseLeaveCell = () => {
-    if (isMouseDown) {
-      stopCellInterval();
-    }
-  };
-
-  let width = 70;
-  let height = 90;
-  let grid: number[][] = createGrid(height, width);
-  let gameUpdateInterval: number;
 
   const resetGrid = () => {
     grid = createGrid(height, width);
   };
 
   onMount(() => {
-    gameUpdateInterval = setInterval(() => {
+    updateInterval = setInterval(() => {
+      if (isMouseDown && currentCell) {
+        placeSandAtCell(currentCell.rowIndex, currentCell.colIndex);
+      }
       grid = updateGrid(grid);
-    }, 0);
+    }, REFRESHRATE_MS);
   });
 
   onDestroy(() => {
-    clearInterval(gameUpdateInterval);
-    stopCellInterval(); // Clear sand creation interval
+    clearInterval(updateInterval);
   });
 </script>
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-<main on:mouseup={handleMouseUp} on:mouseleave={handleMouseUp}>
+<main 
+  on:mouseup={handleMouseUp} 
+  on:mousedown={handleMouseDown}
+>
   <table class="sand-table">
     <tbody>
       {#each grid as row, rowIndex}
@@ -79,9 +57,7 @@
           {#each row as cell, colIndex}
             <td
               class="sand-cell {cell === 1 ? 'filled' : ''}"
-              on:mousedown={() => handleMouseDown(rowIndex, colIndex)}
               on:mouseenter={() => handleMouseEnter(rowIndex, colIndex)}
-              on:mouseleave={handleMouseLeaveCell}
             ></td>
           {/each}
         </tr>
@@ -93,17 +69,17 @@
 
 <style>
   .sand-table {
-  border-collapse: collapse;
-  margin: 20px auto;
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
-}
+    border-collapse: collapse;
+    margin: 20px auto;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+  }
 
-.sand-cell {
-  width: 4px;
-  height: 4px;
-  border: 1px solid #333;
-  background-color: #1e1e1e;
-}
+  .sand-cell {
+    width: 4px;
+    height: 4px;
+    border: 1px solid #333;
+    background-color: #1e1e1e;
+  }
 
   .sand-cell.filled {
     background-color: #ffffff;

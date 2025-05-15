@@ -31,7 +31,6 @@ export const updateGrid = (grid: number[][]): number[][] => {
   for (let row = newGrid.length - 1; row >= 0; row--) {
     for (let col = 0; col < newGrid[0].length; col++) {
       if (newGrid[row][col] == 1) { // If current cell is sand
-        let leftRight = getDiagonals(newGrid, row, col); // Pass newGrid here
         // Check directly below
         if (row + 1 < newGrid.length && newGrid[row + 1][col] == 0) {
           newGrid[row][col] = 0;
