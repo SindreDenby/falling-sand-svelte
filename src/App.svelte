@@ -6,8 +6,8 @@
 
   let isMouseDown = false;
   let currentCell: { rowIndex: number; colIndex: number } | null = null;
-  let width = 80;
-  let height = 90;
+  let width = 60;
+  let height = 100;
   let grid: number[][] = createGrid(height, width);
   let updateInterval: number;
   
